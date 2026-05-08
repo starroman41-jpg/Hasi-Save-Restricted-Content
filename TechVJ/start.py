@@ -217,30 +217,33 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             return 
 
     smsg = await client.send_message(message.chat.id, '**Downloading**', reply_to_message_id=message.id)
-    asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat))
-           # ===== 1.3GB LIMIT CHECK START =====
-        file_size = 0
-        if msg.video:
-            file_size = msg.video.file_size
-        elif msg.document:
-            file_size = msg.document.file_size
-        elif msg.audio:
-            file_size = msg.audio.file_size
 
-        limit = 1300 * 1024 # 1.3 GB in bytes
+ asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat))
 
-        if file_size > limit:
-            size_mb = file_size / 1024
-            await smsg.edit(
-                f"❌ **File Bahut Badi Hai**\n\n"
-                f"**Size:** `{size_mb:.2f} MB`\n"
-                f"**Limit:** `1300 MB (1.3 GB)`\n\n"
-                f"**Direct Link:**\n`{message.text}`",
-                disable_web_page_preview=True
-            )
-            await client.disconnect()
-            return
-        # ===== 1.3GB LIMIT CHECK END =====
+   # ===== 1.3GB LIMIT CHECK START =====
+file_size = 0
+if msg.video:
+    file_size = msg.video.file_size
+elif msg.document:
+    file_size = msg.document.file_size
+elif msg.audio:
+    file_size = msg.audio.file_size
+
+limit = 1300 * 1024 * 1024  # 1.3 GB in bytes
+
+if file_size > limit:
+    size_mb = file_size / (1024 * 1024)
+    await smsg.edit(
+        f"❌ **File Bahut Badi Hai**\n\n"
+        f"**Size:** `{size_mb:.2f} MB`\n"
+        f"**Limit:** `1300 MB (1.3 GB)`\n\n"
+        f"**Direct Link:**\n`{message.text}`",
+        disable_web_page_preview=True
+    )
+    await client.disconnect()
+    return
+# ===== 1.3GB LIMIT CHECK END =====
+
 	try:
 	       
         file = await acc.download_media(msg, progress=progress, progress_args=[message,"down"])
